@@ -1,182 +1,165 @@
+// 
+// Decompiled by Procyon v0.5.36
+// 
+
 package com.snowgears.colorportals.utils;
 
-/**
- * Basic utilities I use for a lot of my plugins that I put into one place.
- * Feel free to use this when creating any of your own plugins.
- *
- * Created by SnowGears (Tanner Embry)
- */
+import java.util.HashMap;
+import java.util.UUID;
 
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.material.Wool;
 
-import java.util.*;
-
-public class BukkitUtils {
-
-    //takes two locations, returns a blockface and a number
-
-    /**
-     * Takes two locations and calculates all cardinal distances
-     * Return:
-     * - HashMap<BlockFace, Integer>: cardinal direction, distance in that direction
-     */
-    public static HashMap<BlockFace, Integer> getCardinalDistances(Location startLocation, Location endLocation) {
-        HashMap<BlockFace, Integer> cardinalDistances = new HashMap<BlockFace, Integer>();
-        int northSouth = startLocation.getBlockZ() - endLocation.getBlockZ();
-        if (northSouth >= 0)
+public class BukkitUtils
+{
+    public static HashMap<BlockFace, Integer> getCardinalDistances(final Location startLocation, final Location endLocation) {
+        final HashMap<BlockFace, Integer> cardinalDistances = new HashMap<BlockFace, Integer>();
+        final int northSouth = startLocation.getBlockZ() - endLocation.getBlockZ();
+        if (northSouth >= 0) {
             cardinalDistances.put(BlockFace.NORTH, Math.abs(northSouth));
-        else
+        }
+        else {
             cardinalDistances.put(BlockFace.SOUTH, Math.abs(northSouth));
-        int eastWest = startLocation.getBlockX() - endLocation.getBlockX();
-        if (eastWest <= 0)
+        }
+        final int eastWest = startLocation.getBlockX() - endLocation.getBlockX();
+        if (eastWest <= 0) {
             cardinalDistances.put(BlockFace.EAST, Math.abs(eastWest));
-        else
+        }
+        else {
             cardinalDistances.put(BlockFace.WEST, Math.abs(eastWest));
-        int upDown = startLocation.getBlockY() - endLocation.getBlockY();
-        if (upDown <= 0)
+        }
+        final int upDown = startLocation.getBlockY() - endLocation.getBlockY();
+        if (upDown <= 0) {
             cardinalDistances.put(BlockFace.UP, Math.abs(upDown));
-        else
+        }
+        else {
             cardinalDistances.put(BlockFace.DOWN, Math.abs(upDown));
+        }
         return cardinalDistances;
     }
-
-    /**
-     * Converts a BlockFace direction to a byte
-     * Return:
-     * - byte: the basic data of the BlockFace direction provided
-     */
-    public byte determineDataOfDirection(BlockFace bf) {
-        if (bf.equals(BlockFace.NORTH))
+    
+    public byte determineDataOfDirection(final BlockFace bf) {
+        if (bf.equals((Object)BlockFace.NORTH)) {
             return 2;
-        if (bf.equals(BlockFace.SOUTH))
+        }
+        if (bf.equals((Object)BlockFace.SOUTH)) {
             return 5;
-        if (bf.equals(BlockFace.WEST))
+        }
+        if (bf.equals((Object)BlockFace.WEST)) {
             return 3;
-        return ((byte) (!bf.equals(BlockFace.EAST) ? 0 : 4));
+        }
+        return (byte)(bf.equals((Object)BlockFace.EAST) ? 4 : 0);
     }
-
-    /**
-     * Converts a BlockFace direction to a yaw (float) value
-     * Return:
-     * - float: the yaw value of the BlockFace direction provided
-     */
-    public float faceToYaw(BlockFace bf) {
-        if (bf.equals(BlockFace.NORTH))
-            return 0F;
-        else if (bf.equals(BlockFace.EAST))
-            return 90F;
-        else if (bf.equals(BlockFace.SOUTH))
-            return 180F;
-        else if (bf.equals(BlockFace.WEST))
-            return 270F;
-        return 0F;
+    
+    public float faceToYaw(final BlockFace bf) {
+        if (bf.equals((Object)BlockFace.NORTH)) {
+            return 0.0f;
+        }
+        if (bf.equals((Object)BlockFace.EAST)) {
+            return 90.0f;
+        }
+        if (bf.equals((Object)BlockFace.SOUTH)) {
+            return 180.0f;
+        }
+        if (bf.equals((Object)BlockFace.WEST)) {
+            return 270.0f;
+        }
+        return 0.0f;
     }
-
-    /**
-     * Checks if a String is an Integer
-     * Return:
-     * - true: String is an Integer
-     * - false: String is not an Integer
-     */
-    public boolean isInteger(String s) {
+    
+    public boolean isInteger(final String s) {
         try {
             Integer.parseInt(s);
-        } catch (NumberFormatException e) {
+        }
+        catch (NumberFormatException e) {
             return false;
         }
         return true;
     }
-
-    /**
-     * Gets the color from a (wool) block
-     * Return:
-     * - DyeColor: the color of the (wool) block
-     */
-    public DyeColor getWoolColor(Block block) {
-        if (!block.getType().name().contains("WOOL"))
-            return null;
-
-        Wool wool = (Wool) block.getState().getData();
-        return wool.getColor();
+    
+    public DyeColor getWoolColor(final Block block) {
+    	Material[] wools = {
+    			Material.WHITE_WOOL,
+    			Material.ORANGE_WOOL,
+    			Material.MAGENTA_WOOL,
+    			Material.LIGHT_BLUE_WOOL,
+    			Material.YELLOW_WOOL,
+    			Material.LIME_WOOL,
+    			Material.PINK_WOOL,
+    			Material.GRAY_WOOL,
+    			Material.LIGHT_GRAY_WOOL,
+    			Material.CYAN_WOOL,
+    			Material.PURPLE_WOOL,
+    			Material.BLUE_WOOL,
+    			Material.BROWN_WOOL,
+    			Material.GREEN_WOOL,
+    			Material.RED_WOOL,
+    			Material.BLACK_WOOL
+    	};
+    	DyeColor[] woolColors = {
+    			DyeColor.WHITE,
+    			DyeColor.ORANGE,
+    			DyeColor.MAGENTA,
+    			DyeColor.LIGHT_BLUE,
+    			DyeColor.YELLOW,
+    			DyeColor.LIME,
+    			DyeColor.PINK,
+    			DyeColor.GRAY,
+    			DyeColor.LIGHT_GRAY,
+    			DyeColor.CYAN,
+    			DyeColor.PURPLE,
+    			DyeColor.BLUE,
+    			DyeColor.BROWN,
+    			DyeColor.GREEN,
+    			DyeColor.RED,
+    			DyeColor.BLACK
+    	};
+    	int woolColor = -1;
+    	for (int i = 0; i < wools.length; i++) {
+    		if (wools[i] == block.getType()) {
+    			woolColor = i;
+    			break;
+    		}
+    	}
+        if(woolColor == -1) return null;
+        return woolColors[woolColor];
     }
-
-    //TODO NEED TO REDO WHOLE COLORPORTALS NAME BY UUID SYSTEM
-    /**
-     * Fetches a players name from their UUID
-     * Return:
-     * - String: Players current name
-     */
-    public String getPlayerFromUUID(UUID uid) {
-//        NameFetcher nameFetcher = new NameFetcher(Arrays.asList(uid));
-//
-//        Map<UUID, String> response;
-//        try {
-//            response = nameFetcher.call();
-//        } catch (Exception e) {
-//            return null;
-//        }
-//
-//        if (response.containsKey(uid)) {
-//            return response.get(uid);
-//        }
+    public static BlockFace attatchedFace(BlockFace f) {
+		if (f == BlockFace.EAST) {
+			return BlockFace.WEST;
+		} else if (f== BlockFace.WEST) {
+			return BlockFace.EAST;
+		} else if (f== BlockFace.NORTH) {
+			return BlockFace.SOUTH;
+		} else if (f== BlockFace.SOUTH) {
+			return BlockFace.NORTH;
+		} else if (f == BlockFace.UP) {
+			return BlockFace.DOWN;
+		} else if (f== BlockFace.DOWN) {
+			return BlockFace.UP;
+		}
+		return BlockFace.SELF;
+	}
+    public static boolean isSign(final Block block) {
+    	Material[] Sign = {
+			Material.ACACIA_WALL_SIGN,
+			Material.BIRCH_WALL_SIGN,
+			Material.DARK_OAK_WALL_SIGN,
+			Material.JUNGLE_WALL_SIGN,
+			Material.OAK_WALL_SIGN,
+			Material.SPRUCE_WALL_SIGN
+		};
+    	for (int i = 0; i < Sign.length; i++) {
+    		if (block.getType() == Sign[i]) {
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+    public String getPlayerFromUUID(final UUID uid) {
         return null;
     }
-
-//    /**
-//     * Fetches multiple player names from a list of their UUIDs
-//     * Return:
-//     * - Map<UUID, String>:Player UUIDs mapped to their current names
-//     */
-//    public Map<UUID, String> getPlayersFromUUIDs(List<UUID> uidList) {
-//        NameFetcher nameFetcher = new NameFetcher(uidList);
-//
-//        Map<UUID, String> response = null;
-//        try {
-//            response = nameFetcher.call();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        return response;
-//    }
-
-//    /**
-//     * Utility written by EvilMidget38
-//     */
-//    private class NameFetcher implements Callable<Map<UUID, String>> {
-//        private static final String PROFILE_URL = "https://sessionserver.mojang.com/session/minecraft/profile/";
-//        private final JSONParser jsonParser = new JSONParser();
-//        private final List<UUID> uuids;
-//
-//        public NameFetcher(List<UUID> uuids) {
-//            this.uuids = ImmutableList.copyOf(uuids);
-//        }
-//
-//        @Override
-//        public Map<UUID, String> call() throws Exception {
-//            Map<UUID, String> uuidStringMap = new HashMap<UUID, String>();
-//            for (UUID uuid : uuids) {
-//                HttpURLConnection connection = (HttpURLConnection) new URL(PROFILE_URL + uuid.toString().replace("-", "")).openConnection();
-//                JSONObject response = (JSONObject) jsonParser.parse(new InputStreamReader(connection.getInputStream()));
-//                String name = (String) response.get("name");
-//                if (name == null) {
-//                    continue;
-//                }
-//                String cause = (String) response.get("cause");
-//                String errorMessage = (String) response.get("errorMessage");
-//                if (cause != null && cause.length() > 0) {
-//                    throw new IllegalStateException(errorMessage);
-//                }
-//                uuidStringMap.put(uuid, name);
-//            }
-//            return uuidStringMap;
-//        }
-//    }
 }
-
-

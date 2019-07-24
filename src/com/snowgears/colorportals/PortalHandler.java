@@ -1,282 +1,254 @@
+// 
+// Decompiled by Procyon v0.5.36
+// 
+
 package com.snowgears.colorportals;
 
-/**
- * This class handles all of the basic functions in the managing of Portals.
- * - Managing HashMap of Portals
- *    - Adding Portals
- *    - Removing Portals
- * - Saving data file
- * - Loading data file
- */
-
-import org.bukkit.DyeColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
+import java.util.Set;
+import java.util.UUID;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import java.io.File;
+import com.snowgears.colorportals.utils.BukkitUtils;
+
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.io.IOException;
+import java.io.File;
+import org.bukkit.DyeColor;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Collections;
+import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.Block;
+import java.util.Collection;
+import java.util.ArrayList;
+import org.bukkit.Location;
+import java.util.HashMap;
 
-
-public class PortalHandler {
-
-    public ColorPortals plugin = ColorPortals.getPlugin();
-
-    private HashMap<Location, Portal> allPortals = new HashMap<Location, Portal>();
-
-    public PortalHandler(ColorPortals instance) {
-        plugin = instance;
+public class PortalHandler
+{
+    public ColorPortals plugin;
+    private HashMap<Location, Portal> allPortals;
+    
+    public PortalHandler(final ColorPortals instance) {
+        this.plugin = ColorPortals.getPlugin();
+        this.allPortals = new HashMap<Location, Portal>();
+        this.plugin = instance;
     }
-
-    public Portal getPortal(Location loc) {
-        return allPortals.get(loc);
+    
+    public Portal getPortal(final Location loc) {
+        return this.allPortals.get(loc);
     }
-
-    public void registerPortal(Portal portal) {
-        allPortals.put(portal.getSignLocation(), portal);
-
-        ArrayList<Portal> portalFamily = this.getPortalFamily(portal);
+    
+    public void registerPortal(final Portal portal) {
+        this.allPortals.put(portal.getSignLocation(), portal);
+        final ArrayList<Portal> portalFamily = this.getPortalFamily(portal);
         if (portalFamily.size() == 1) {
             portal.setLinkedPortal(null);
             return;
         }
-        Portal lastPortal = portalFamily.get(portalFamily.size() - 2);
+        final Portal lastPortal = portalFamily.get(portalFamily.size() - 2);
         lastPortal.setLinkedPortal(portal);
         portal.setLinkedPortal(portalFamily.get(0));
     }
-
-    //this method should only be called from the portal class when removing portals
-    public void deregisterPortal(Portal portal) {
-        if (allPortals.containsKey(portal.getSignLocation())) {
-            allPortals.remove(portal.getSignLocation());
+    
+    public void deregisterPortal(final Portal portal) {
+        if (this.allPortals.containsKey(portal.getSignLocation())) {
+            this.allPortals.remove(portal.getSignLocation());
         }
     }
-
+    
     public Collection<Portal> getAllPortals() {
-        return allPortals.values();
+        return this.allPortals.values();
     }
-
-    public Portal getPortalByFrameLocation(Location location) {
-        Location loc;
-        for (int x = -1; x < 2; x++) {
-            for (int y = 0; y < 4; y++) {
-                for (int z = -1; z < 2; z++) {
-                    loc = location.clone().add(x, y, z);
-                    if (getPortal(loc) != null) {
-                        Portal portal = getPortal(loc);
-                        if (portal.getOccupiedLocations().contains(location))
+    
+    public Portal getPortalByFrameLocation(final Location location) {
+        for (int x = -1; x < 2; ++x) {
+            for (int y = 0; y < 4; ++y) {
+                for (int z = -1; z < 2; ++z) {
+                    final Location loc = location.clone().add((double)x, (double)y, (double)z);
+                    if (this.getPortal(loc) != null) {
+                        final Portal portal = this.getPortal(loc);
+                        if (portal.getOccupiedLocations().contains(location)) {
                             return portal;
+                        }
                     }
                 }
             }
         }
         return null;
     }
-
-    //TODO bug here. Will always prioritize finding north sign first and would return null if multiple signs on portal
-    public Portal getPortalByKeyBlock(Block portalKeyBlock) {
-        if (portalKeyBlock.getRelative(BlockFace.NORTH).getType() == Material.WALL_SIGN) {
-            return plugin.getPortalHandler().getPortal(portalKeyBlock.getRelative(BlockFace.NORTH).getLocation());
-        } else if (portalKeyBlock.getRelative(BlockFace.EAST).getType() == Material.WALL_SIGN) {
-            return plugin.getPortalHandler().getPortal(portalKeyBlock.getRelative(BlockFace.EAST).getLocation());
-        } else if (portalKeyBlock.getRelative(BlockFace.SOUTH).getType() == Material.WALL_SIGN) {
-            return plugin.getPortalHandler().getPortal(portalKeyBlock.getRelative(BlockFace.SOUTH).getLocation());
-        } else if (portalKeyBlock.getRelative(BlockFace.WEST).getType() == Material.WALL_SIGN) {
-            return plugin.getPortalHandler().getPortal(portalKeyBlock.getRelative(BlockFace.WEST).getLocation());
+    
+    public Portal getPortalByKeyBlock(final Block portalKeyBlock) {
+        if (BukkitUtils.isSign(portalKeyBlock.getRelative(BlockFace.NORTH))) {
+            return this.plugin.getPortalHandler().getPortal(portalKeyBlock.getRelative(BlockFace.NORTH).getLocation());
+        }
+        if (BukkitUtils.isSign(portalKeyBlock.getRelative(BlockFace.EAST))) {
+            return this.plugin.getPortalHandler().getPortal(portalKeyBlock.getRelative(BlockFace.EAST).getLocation());
+        }
+        if (BukkitUtils.isSign(portalKeyBlock.getRelative(BlockFace.SOUTH))) {
+            return this.plugin.getPortalHandler().getPortal(portalKeyBlock.getRelative(BlockFace.SOUTH).getLocation());
+        }
+        if (BukkitUtils.isSign(portalKeyBlock.getRelative(BlockFace.WEST))) {
+            return this.plugin.getPortalHandler().getPortal(portalKeyBlock.getRelative(BlockFace.WEST).getLocation());
         }
         return null;
     }
-
+    
     public int getNumberOfPortals() {
-        return allPortals.size();
+        return this.allPortals.size();
     }
-
-    /**
-     * Finds all portals with the same color and channel as the portal provided
-     * Return:
-     * - arraylist of all portals in the family (matching color and channel)
-     */
-    public ArrayList<Portal> getPortalFamily(Portal portal) {
-        ArrayList<Portal> portalFamily = new ArrayList<Portal>();
-        for (Portal checkedPortal : plugin.getPortalHandler().getAllPortals()) {
-            if (checkedPortal.getChannel() == portal.getChannel() && checkedPortal.getColor().equals(portal.getColor())) {
+    
+    public ArrayList<Portal> getPortalFamily(final Portal portal) {
+        final ArrayList<Portal> portalFamily = new ArrayList<Portal>();
+        for (final Portal checkedPortal : this.plugin.getPortalHandler().getAllPortals()) {
+            if (checkedPortal.getChannel() == portal.getChannel() && checkedPortal.getColor().equals((Object)portal.getColor())) {
                 portalFamily.add(checkedPortal);
             }
         }
         Collections.sort(portalFamily);
         return portalFamily;
     }
-
-    /**
-     * Finds all portals with the same color and channel as the ones provided
-     * Return:
-     * - arraylist of all portals in the family (matching color and channel)
-     */
-    public ArrayList<Portal> getPortalFamily(Integer channel, DyeColor color) {
-        ArrayList<Portal> portalFamily = new ArrayList<Portal>();
-        for (Portal checkedPortal : plugin.getPortalHandler().getAllPortals()) {
-            if (checkedPortal.getChannel() == channel && checkedPortal.getColor().equals(color)) {
+    
+    public ArrayList<Portal> getPortalFamily(final Integer channel, final DyeColor color) {
+        final ArrayList<Portal> portalFamily = new ArrayList<Portal>();
+        for (final Portal checkedPortal : this.plugin.getPortalHandler().getAllPortals()) {
+            if (checkedPortal.getChannel() == channel && checkedPortal.getColor().equals((Object)color)) {
                 portalFamily.add(checkedPortal);
             }
         }
         Collections.sort(portalFamily);
         return portalFamily;
     }
-
+    
     private ArrayList<Portal> orderedPortalList() {
-        ArrayList<Portal> list = new ArrayList<Portal>(allPortals.values());
+        final ArrayList<Portal> list = new ArrayList<Portal>(this.allPortals.values());
         Collections.sort(list);
         return list;
     }
-
+    
     public void savePortals() {
-        File fileDirectory = new File(plugin.getDataFolder(), "Data");
-        if (!fileDirectory.exists())
+        final File fileDirectory = new File(this.plugin.getDataFolder(), "Data");
+        if (!fileDirectory.exists()) {
             fileDirectory.mkdir();
-        File portalFile = new File(fileDirectory + "/portals.yml");
-        if (!portalFile.exists()) { // file doesn't exist
+        }
+        final File portalFile = new File(fileDirectory + "/portals.yml");
+        if (!portalFile.exists()) {
             try {
                 portalFile.createNewFile();
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 e.printStackTrace();
             }
-        } else { //does exist, clear it for future saving
+        }
+        else {
             PrintWriter writer = null;
             try {
                 writer = new PrintWriter(portalFile);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
+            }
+            catch (FileNotFoundException e2) {
+                e2.printStackTrace();
             }
             writer.print("");
             writer.close();
         }
-
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(portalFile);
-        ArrayList<Portal> portalList = orderedPortalList();
-
-        for (Portal portal : portalList) {
-            config.set("portals." + portal.getColor().toString() + "." + portal.getChannel() + "-" + portal.getNode() + ".name", portal.getName());
-            config.set("portals." + portal.getColor().toString() + "." + portal.getChannel() + "-" + portal.getNode() + ".location", locationToString(portal.getSignLocation()));
-            config.set("portals." + portal.getColor().toString() + "." + portal.getChannel() + "-" + portal.getNode() + ".creator", portal.getCreator().toString());
+        final YamlConfiguration config = YamlConfiguration.loadConfiguration(portalFile);
+        final ArrayList<Portal> portalList = this.orderedPortalList();
+        for (final Portal portal : portalList) {
+            config.set("portals." + portal.getColor().toString() + "." + portal.getChannel() + "-" + portal.getNode() + ".name", (Object)portal.getName());
+            config.set("portals." + portal.getColor().toString() + "." + portal.getChannel() + "-" + portal.getNode() + ".location", (Object)this.locationToString(portal.getSignLocation()));
+            config.set("portals." + portal.getColor().toString() + "." + portal.getChannel() + "-" + portal.getNode() + ".creator", (Object)portal.getCreator().toString());
         }
-
         try {
             config.save(portalFile);
-        } catch (IOException ioe) {
+        }
+        catch (IOException ioe) {
             ioe.printStackTrace();
         }
     }
-
+    
     public void loadPortals() {
-        File fileDirectory = new File(plugin.getDataFolder(), "Data");
-        if (!fileDirectory.exists())
+        final File fileDirectory = new File(this.plugin.getDataFolder(), "Data");
+        if (!fileDirectory.exists()) {
             return;
-        File portalFile = new File(fileDirectory + "/portals.yml");
-        if (!portalFile.exists())
+        }
+        final File portalFile = new File(fileDirectory + "/portals.yml");
+        if (!portalFile.exists()) {
             return;
-
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(portalFile);
-        loadPortalsFromConfig(config);
+        }
+        final YamlConfiguration config = YamlConfiguration.loadConfiguration(portalFile);
+        this.loadPortalsFromConfig(config);
     }
-
-    private void loadPortalsFromConfig(YamlConfiguration config) {
-
-        if (config.getConfigurationSection("portals") == null)
+    
+    private void loadPortalsFromConfig(final YamlConfiguration config) {
+        if (config.getConfigurationSection("portals") == null) {
             return;
-        Set<String> allPortalColors = config.getConfigurationSection("portals").getKeys(false);
-
-        ArrayList<Portal> portalFamily = new ArrayList<Portal>();
-
-        //  for (String portalColor : allPortalColors) {
-        for (Iterator<String> colorIterator = allPortalColors.iterator(); colorIterator.hasNext(); ) {
-            String portalColor = colorIterator.next();
-            Set<String> allPortalChannels = config.getConfigurationSection("portals." + portalColor).getKeys(false);
+        }
+        final Set<String> allPortalColors = (Set<String>)config.getConfigurationSection("portals").getKeys(false);
+        final ArrayList<Portal> portalFamily = new ArrayList<Portal>();
+        final Iterator<String> colorIterator = allPortalColors.iterator();
+        while (colorIterator.hasNext()) {
+            final String portalColor = colorIterator.next();
+            final Set<String> allPortalChannels = (Set<String>)config.getConfigurationSection("portals." + portalColor).getKeys(false);
             portalFamily.clear();
-
             int previousChannel = 0;
             if (allPortalChannels.iterator().hasNext()) {
-                String stringChannel = allPortalChannels.iterator().next();
-                String[] split = stringChannel.split("-");
+                final String stringChannel = allPortalChannels.iterator().next();
+                final String[] split = stringChannel.split("-");
                 previousChannel = Integer.parseInt(split[0]);
             }
-
-            //  for (String portalChannel : allPortalChannels) {
-            for (Iterator<String> channelIterator = allPortalChannels.iterator(); channelIterator.hasNext(); ) {
-                String portalChannel = channelIterator.next();
-
-                Location signLocation = locationFromString(config.getString("portals." + portalColor + "." + portalChannel + ".location"));
-                Block signBlock = signLocation.getBlock();
-
-                if (signBlock.getType() == Material.WALL_SIGN) {
-
-                    DyeColor color = DyeColor.valueOf(portalColor);
-
-                    String[] split = portalChannel.split("-");
-                    int channel = Integer.parseInt(split[0]);
-                    int node = Integer.parseInt(split[1]);
-
-                    String name = config.getString("portals." + portalColor + "." + portalChannel + ".name");
-
-                    String creatorString = config.getString("portals." + portalColor + "." + portalChannel + ".creator");
-                    UUID creator = UUID.fromString(creatorString);
-
-                    Portal portal = new Portal(creator, name, color, channel, node, signLocation);
-
-
-                    //previous portal was the last portal in the family (same color, different channel)
-                    //portal working with now is the first portal of the new family
+            final Iterator<String> channelIterator = allPortalChannels.iterator();
+            while (channelIterator.hasNext()) {
+                final String portalChannel = channelIterator.next();
+                final Location signLocation = this.locationFromString(config.getString("portals." + portalColor + "." + portalChannel + ".location"));
+                final Block signBlock = signLocation.getBlock();
+                if (BukkitUtils.isSign(signBlock)) {
+                    final DyeColor color = DyeColor.valueOf(portalColor);
+                    final String[] split2 = portalChannel.split("-");
+                    final int channel = Integer.parseInt(split2[0]);
+                    final int node = Integer.parseInt(split2[1]);
+                    final String name = config.getString("portals." + portalColor + "." + portalChannel + ".name");
+                    final String creatorString = config.getString("portals." + portalColor + "." + portalChannel + ".creator");
+                    final UUID creator = UUID.fromString(creatorString);
+                    final Portal portal = new Portal(creator, name, color, channel, node, signLocation);
                     if (previousChannel != channel) {
                         previousChannel = channel;
-                        //if family only has one portal, set link to null
                         if (portalFamily.size() == 1) {
                             portalFamily.get(0).setLinkedPortal(null);
                         }
-                        //if family has more than 1 portal, link the last portal to the first portal
                         else {
                             portalFamily.get(portalFamily.size() - 1).setLinkedPortal(portalFamily.get(0));
                         }
-
-                        //register portalFamily before resetting for the next family
-                        for (Portal p : portalFamily) {
+                        for (final Portal p : portalFamily) {
                             this.registerPortal(p);
                         }
-
-                        //reset for next family
                         portalFamily.clear();
                         portalFamily.add(portal);
                     }
-                    //portal working with now is still a member of the current family
                     else {
                         portalFamily.add(portal);
-
                         if (portalFamily.size() > 1) {
                             portalFamily.get(portalFamily.size() - 2).setLinkedPortal(portalFamily.get(portalFamily.size() - 1));
                         }
-
-                        //if there are no more channels and no more colors to go through
-                        if (!(channelIterator.hasNext() && colorIterator.hasNext())) {
-                            //load the last portalFamily currently in memory to the class level
-                            for (Portal p : portalFamily) {
-                                this.registerPortal(p);
-                            }
+                        if (channelIterator.hasNext() && colorIterator.hasNext()) {
+                            continue;
+                        }
+                        for (final Portal p : portalFamily) {
+                            this.registerPortal(p);
                         }
                     }
                 }
             }
         }
     }
-
-    private String locationToString(Location loc) {
+    
+    private String locationToString(final Location loc) {
         return loc.getWorld().getName() + "," + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ();
     }
-
-    private Location locationFromString(String loc) {
-        String[] parts = loc.split(",");
-        return new Location(plugin.getServer().getWorld(parts[0]), Double.parseDouble(parts[1]), Double.parseDouble(parts[2]), Double.parseDouble(parts[3]));
+    
+    private Location locationFromString(final String loc) {
+        final String[] parts = loc.split(",");
+        return new Location(this.plugin.getServer().getWorld(parts[0]), Double.parseDouble(parts[1]), Double.parseDouble(parts[2]), Double.parseDouble(parts[3]));
     }
 }
